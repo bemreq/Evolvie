@@ -158,3 +158,4 @@ if __name__ == "__main__":
     pencere = tk.Tk()
     uygulama = Uygulama(pencere)
     pencere.mainloop()
+#Kayit ol sayfasinda e posta daha once bildirimi ciktiginda kullaniciya bir yazi ve buton ciksin ve yazida hesabin sahibi o ise butona tikayip giris yap sayfasina geri yonlendirilsin ve kayit ol sayfasi kapansin.
