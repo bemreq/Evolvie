@@ -1,55 +1,160 @@
 import tkinter as tk
-from tkinter import ttk
-class Uygulama(tk.Tk):
-    def __init__(self):
-        super().__init__()
-        self.title("Evolvie")
-        self.geometry("800x600")
+from tkinter import ttk, messagebox
+import json
+import re
+import random
+import string
 
-        self.not_defteri = ttk.Notebook(self)
-        self.not_defteri.pack(expand=True, fill=tk.BOTH)
 
-        self.login_tab = ttk.Frame(self.not_defteri)
-        self.anasayfa_tab = ttk.Frame(self.not_defteri)
-        self.uyku_ve_aktivite_tab = ttk.Frame(self.not_defteri)
-        self.beslenme_ve_spor_tab = ttk.Frame(self.not_defteri)
-        
-        self.not_defteri.add(self.login_tab, text="Giris Yap")
-        self.not_defteri.add(self.anasayfa_tab, text="Anasayfa")
-        self.not_defteri.add(self.uyku_ve_aktivite_tab, text="Uyku ve Aktivite")
-        self.not_defteri.add(self.beslenme_ve_spor_tab, text="Beslenme ve Spor")
+class Uygulama:
+    def __init__(self, pencere):
+        self.pencere = pencere
+        self.pencere.title("Evolvie")
+        self.pencere.geometry("400x800")
 
-        
-        self.login_label = tk.Label(self.login_tab, text="Kullanici Adi")
-        self.login_label.pack()
-        self.login_entry = tk.Entry(self.login_tab)
-        self.login_entry.pack()
-        
-        self.login_label = tk.Label(self.login_tab, text="Sifre")
-        self.login_label.pack()
-        self.login_entry = tk.Entry(self.login_tab)
-        self.login_entry.pack()
+        self.sayfa_degistirici = tk.StringVar(value="Giris Ekrani")
+        self.ad_soyad_entry = None
+        self.uyku_saati_entry = None
 
-        self.login_giris_button = tk.Button(self.login_tab, text="Giris Yap", command=self.giris)
-        self.login_giris_button.pack()
-        
-        self.uyku_saati_label = tk.Label(self.uyku_ve_aktivite_tab, text="Uyku Saati:")
-        self.uyku_saati_label.pack()
+        self.not_defteri = ttk.Notebook(self.pencere)
+        self.not_defteri.pack(fill=tk.BOTH, expand=True)
 
-        self.uyku_saati_entry = tk.Entry(self.uyku_ve_aktivite_tab)
-        self.uyku_saati_entry.pack()
+        # Giriş ekranını oluştur
+        self.giris_ekrani_gorunumu()
 
-        self.uyku_saati_kaydet_button = tk.Button(self.uyku_ve_aktivite_tab, text="Kaydet", command=self.kaydet)
-        self.uyku_saati_kaydet_button.pack()
-
-    def giris(self):
-        login = self.login_entry.get()
-        
-    def kaydet(self):
+    def verileri_kaydet(self):
+        ad_soyad = self.ad_soyad_entry.get()
         uyku_saati = self.uyku_saati_entry.get()
-        # Bu noktada veriyi bir yerde saklayabilirsiniz.
+
+        veriler = {
+            "AdSoyad": ad_soyad,
+        }
+
+        with open("kullanici_verileri.json", "w") as dosya:
+            json.dump(veriler, dosya, indent=2)
+
+        messagebox.showinfo("Başarılı", "Veriler başarıyla kaydedildi.")
+
+    def giris_ekrani_gorunumu(self):
+        giris_tab = ttk.Frame(self.not_defteri)
+        self.not_defteri.add(giris_tab, text="Giriş Ekranı")
+
+        tk.Label(giris_tab, text="Hoş Geldiniz!").pack(pady=10)
+
+        tk.Label(giris_tab, text="E-posta Adresi:").pack()
+        self.eposta_entry = tk.Entry(giris_tab)
+        self.eposta_entry.pack()
+
+        tk.Label(giris_tab, text="Şifre:").pack()
+        self.sifre_entry = tk.Entry(giris_tab, show="*")
+        self.sifre_entry.pack()
+
+        tk.Button(giris_tab, text="Giriş Yap", command=self.giris_yap).pack(pady=10)
+
+        tk.Button(giris_tab, text="Kayıt Ol", command=self.kayit_ol_gorunumu).pack(pady=10)
+
+    def kayit_ol_gorunumu(self):
+        kayit_tab = ttk.Frame(self.not_defteri)
+        self.not_defteri.add(kayit_tab, text="Kayıt Ol")
+
+        tk.Label(kayit_tab, text="Ad Soyad:").pack()
+        self.ad_soyad_entry = tk.Entry(kayit_tab)
+        self.ad_soyad_entry.pack()
+
+        tk.Label(kayit_tab, text="E-posta Adresi:").pack()
+        self.eposta_entry_kayit = tk.Entry(kayit_tab)
+        self.eposta_entry_kayit.pack()
+
+        tk.Label(kayit_tab, text="Şifre:").pack()
+        self.sifre_entry_kayit = tk.Entry(kayit_tab, show="*")
+        self.sifre_entry_kayit.pack()
+
+        tk.Button(kayit_tab, text="Kayıt Ol", command=self.kullanici_kaydet).pack(pady=10)
+
+        # Kayıt Ol sekmesine geçiş
+        self.not_defteri.select(1)
+
+        # Giriş ekranını gizle
+        self.not_defteri.forget(0)
+
+    def kullanici_kaydet(self):
+        ad_soyad = self.ad_soyad_entry.get()
+
+        # Kullanıcıların daha önce kayıtlı olup olmadığını kontrol et
+        if self.kullanici_var_mi(self.eposta_entry_kayit.get()):
+            messagebox.showerror("Hata", "Bu e-posta adresi zaten kullanılmaktadır.")
+            return
+
+        if not ad_soyad or not self.eposta_entry_kayit.get() or not self.sifre_entry_kayit.get():
+            messagebox.showerror("Hata", "Lütfen tüm alanları doldurun.")
+            return
+
+        if not self.email_dogrula(self.eposta_entry_kayit.get()):
+            return
+
+        yeni_kullanici = {
+            "AdSoyad": ad_soyad,
+            "Eposta": self.eposta_entry_kayit.get(),
+            "Sifre": self.sifre_entry_kayit.get()
+        }
+
+        with open("kullanicilar.json", "a") as dosya:
+            json.dump(yeni_kullanici, dosya)
+            dosya.write("\n")  # Her kullanıcıyı yeni bir satıra ekleyin
+
+        messagebox.showinfo("Başarılı", "Kayıt işlemi tamamlandı.")
+
+        # Kayıt işlemi tamamlandıktan sonra kayıt sekmesini kapat
+        self.not_defteri.forget(self.not_defteri.select())
+
+        # Giriş ekranını göster
+        self.giris_ekrani_gorunumu()
+
+    def email_dogrula(self, email):
+        pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        if not re.match(pattern, email):
+            messagebox.showerror("Hata", "Geçersiz e-posta adresi.")
+            return False
+        return True
+
+    def kullanici_var_mi(self, eposta):
+        try:
+            with open("kullanicilar.json", "r") as dosya:
+                kullanicilar = dosya.readlines()
+
+            for kullanici_str in kullanicilar:
+                kullanici = json.loads(kullanici_str)
+                if kullanici["Eposta"] == eposta:
+                    return True
+        except FileNotFoundError:
+            return False
+
+        return False
+
+    def random_string(self, length):
+        letters = string.ascii_lowercase
+        return ''.join(random.choice(letters) for i in range(length))
+
+    def giris_yap(self):
+        eposta = self.eposta_entry.get()
+        sifre = self.sifre_entry.get()
+
+        with open("kullanicilar.json", "r") as dosya:
+            kullanicilar = dosya.readlines()
+
+        for kullanici_str in kullanicilar:
+            kullanici = json.loads(kullanici_str)
+            if kullanici["Eposta"] == eposta and kullanici["Sifre"] == sifre:
+                messagebox.showinfo("Başarılı", "Giriş işlemi tamamlandı.")
+
+                # Giriş ekranını kapat
+                self.not_defteri.forget(0)
+                return
+
+        messagebox.showerror("Hata", "E-posta veya şifre hatalı.")
+
 
 if __name__ == "__main__":
-    uygulama = Uygulama()
-    uygulama.mainloop()
-
+    pencere = tk.Tk()
+    uygulama = Uygulama(pencere)
+    pencere.mainloop()
