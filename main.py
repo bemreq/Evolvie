@@ -2,8 +2,20 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import json
 import re
+import hashlib
 import random
 import string
+
+
+class Kullanici:
+    def __init__(self, ad_soyad, eposta, sifre):
+        self.AdSoyad = ad_soyad
+        self.Eposta = eposta
+        self.Sifre = self.hash_sifre(sifre)
+
+    def hash_sifre(self, sifre):
+        # Şifreleri hashleme işlemi
+        return hashlib.sha256(sifre.encode()).hexdigest()
 
 
 class Uygulama:
@@ -92,14 +104,14 @@ class Uygulama:
         if not self.email_dogrula(self.eposta_entry_kayit.get()):
             return
 
-        yeni_kullanici = {
-            "AdSoyad": ad_soyad,
-            "Eposta": self.eposta_entry_kayit.get(),
-            "Sifre": self.sifre_entry_kayit.get()
-        }
+        yeni_kullanici = Kullanici(
+            ad_soyad=ad_soyad,
+            eposta=self.eposta_entry_kayit.get(),
+            sifre=self.sifre_entry_kayit.get()
+        )
 
         with open("kullanicilar.json", "a") as dosya:
-            json.dump(yeni_kullanici, dosya)
+            json.dump(yeni_kullanici.__dict__, dosya)
             dosya.write("\n")  # Her kullanıcıyı yeni bir satıra ekleyin
 
         messagebox.showinfo("Başarılı", "Kayıt işlemi tamamlandı.")
@@ -144,7 +156,7 @@ class Uygulama:
 
         for kullanici_str in kullanicilar:
             kullanici = json.loads(kullanici_str)
-            if kullanici["Eposta"] == eposta and kullanici["Sifre"] == sifre:
+            if kullanici["Eposta"] == eposta and kullanici["Sifre"] == hashlib.sha256(sifre.encode()).hexdigest():
                 messagebox.showinfo("Başarılı", "Giriş işlemi tamamlandı.")
 
                 # Giriş ekranını kapat
@@ -158,4 +170,3 @@ if __name__ == "__main__":
     pencere = tk.Tk()
     uygulama = Uygulama(pencere)
     pencere.mainloop()
-#Kayit ol sayfasinda e posta daha once bildirimi ciktiginda kullaniciya bir yazi ve buton ciksin ve yazida hesabin sahibi o ise butona tikayip giris yap sayfasina geri yonlendirilsin ve kayit ol sayfasi kapansin.
