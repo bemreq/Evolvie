@@ -8,6 +8,7 @@ import smtplib
 import string
 from email.mime.text import MIMEText
 
+
 class Kullanici:
     def __init__(self, ad_soyad, eposta, sifre):
         self.AdSoyad = ad_soyad
@@ -16,6 +17,7 @@ class Kullanici:
 
     def hash_sifre(self, sifre):
         return hashlib.sha256(sifre.encode()).hexdigest()
+
 
 class Uygulama:
     def __init__(self, pencere):
@@ -64,11 +66,14 @@ class Uygulama:
         self.sifre_entry = tk.Entry(giris_tab, show="*")
         self.sifre_entry.pack()
 
-        tk.Button(giris_tab, text="Giriş Yap", command=self.giris_yap).pack(pady=10)
+        tk.Button(giris_tab, text="Giriş Yap",
+                  command=self.giris_yap).pack(pady=10)
 
-        tk.Button(giris_tab, text="Kayıt Ol", command=self.kayit_ol_gorunumu).pack(pady=10)
+        tk.Button(giris_tab, text="Kayıt Ol",
+                  command=self.kayit_ol_gorunumu).pack(pady=10)
 
-        tk.Button(giris_tab, text="Şifremi Unuttum", command=self.sifremi_unuttum_gorunumu).pack(pady=10)
+        tk.Button(giris_tab, text="Şifremi Unuttum",
+                  command=self.sifremi_unuttum_gorunumu).pack(pady=10)
 
     def kullanici_var_mi(self, eposta):
         try:
@@ -94,7 +99,8 @@ class Uygulama:
         sifre = self.sifre_entry.get()
 
         if not eposta or not sifre:
-            messagebox.showerror("Hata", "E-posta ve şifre alanları boş bırakılamaz.")
+            messagebox.showerror(
+                "Hata", "E-posta ve şifre alanları boş bırakılamaz.")
             return
 
         if not self.kullanici_var_mi(eposta):
@@ -127,7 +133,8 @@ class Uygulama:
         self.sifre_entry_kayit = tk.Entry(kayit_tab, show="*")
         self.sifre_entry_kayit.pack()
 
-        tk.Button(kayit_tab, text="Kayıt Ol", command=self.kullanici_kaydet).pack(pady=10)
+        tk.Button(kayit_tab, text="Kayıt Ol",
+                  command=self.kullanici_kaydet).pack(pady=10)
 
         # Kayıt Ol sekmesine geçiş
         self.not_defteri.select(1)
@@ -140,7 +147,8 @@ class Uygulama:
 
         # Kullanıcıların daha önce kayıtlı olup olmadığını kontrol et
         if self.kullanici_var_mi(self.eposta_entry_kayit.get()):
-            messagebox.showerror("Hata", "Bu e-posta adresi zaten kullanılmaktadır.")
+            messagebox.showerror(
+                "Hata", "Bu e-posta adresi zaten kullanılmaktadır.")
             return
 
         if not ad_soyad or not self.eposta_entry_kayit.get() or not self.sifre_entry_kayit.get():
@@ -182,7 +190,8 @@ class Uygulama:
         self.eposta_entry_unuttum = tk.Entry(unuttum_tab)
         self.eposta_entry_unuttum.pack()
 
-        tk.Button(unuttum_tab, text="Doğrulama Kodu Gönder", command=self.dogrulama_kodu_gonder).pack(pady=10)
+        tk.Button(unuttum_tab, text="Doğrulama Kodu Gönder",
+                  command=self.dogrulama_kodu_gonder).pack(pady=10)
 
     def dogrulama_kodu_gonder(self):
         eposta = self.eposta_entry_unuttum.get()
@@ -197,14 +206,16 @@ class Uygulama:
         self.eposta_gonder(eposta, f"Doğrulama Kodu: {self.dogrulama_kodu}")
 
         # Doğrulama sayfasına geçiş
-        self.not_defteri.add(ttk.Frame(self.not_defteri), text="Doğrulama Sayfası")
+        self.not_defteri.add(ttk.Frame(self.not_defteri),
+                             text="Doğrulama Sayfası")
         self.not_defteri.select(len(self.not_defteri.tabs()) - 1)
         self.dogrulama_sayfasi_gorunumu()
 
         # Şifremi Unuttum sekmesini gizle
         self.not_defteri.forget(len(self.not_defteri.tabs()) - 2)
 
-        messagebox.showinfo("Başarılı", "Doğrulama kodu e-posta adresinize gönderildi.")
+        messagebox.showinfo(
+            "Başarılı", "Doğrulama kodu e-posta adresinize gönderildi.")
 
     def dogrulama_sayfasi_gorunumu(self):
         dogrulama_tab = self.not_defteri.tabs()[-1]
@@ -213,7 +224,8 @@ class Uygulama:
         self.dogrulama_entry = tk.Entry(dogrulama_tab)
         self.dogrulama_entry.pack()
 
-        tk.Button(dogrulama_tab, text="Doğrula", command=self.dogrula).pack(pady=10)
+        tk.Button(dogrulama_tab, text="Doğrula",
+                  command=self.dogrula).pack(pady=10)
 
     def dogrula(self):
         girilen_kod = self.dogrulama_entry.get()
@@ -237,7 +249,8 @@ class Uygulama:
         self.yeni_sifre_tekrar_entry = tk.Entry(yeni_sifre_tab, show="*")
         self.yeni_sifre_tekrar_entry.pack()
 
-        tk.Button(yeni_sifre_tab, text="Şifreyi Değiştir", command=self.sifreyi_degistir).pack(pady=10)
+        tk.Button(yeni_sifre_tab, text="Şifreyi Değiştir",
+                  command=self.sifreyi_degistir).pack(pady=10)
 
     def sifreyi_degistir(self):
         yeni_sifre = self.yeni_sifre_entry.get()
@@ -277,13 +290,14 @@ class Uygulama:
                 server.starttls()
                 server.login(smtp_username, smtp_password)
                 server.sendmail(smtp_username, eposta, msg.as_string())
-                
+
         except Exception as e:
             messagebox.showerror("Hata", f"E-posta gönderme hatası: {str(e)}")
 
     def random_string(self, length):
         letters = string.ascii_lowercase
         return ''.join(random.choice(letters) for i in range(length))
+
 
 if __name__ == "__main__":
     pencere = tk.Tk()
