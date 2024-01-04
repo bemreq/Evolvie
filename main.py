@@ -5,6 +5,7 @@ import re
 import hashlib
 import random
 import smtplib
+import string
 from email.mime.text import MIMEText
 
 class Kullanici:
@@ -24,7 +25,6 @@ class Uygulama:
 
         self.sayfa_degistirici = tk.StringVar(value="Giris Ekrani")
         self.ad_soyad_entry = None
-        self.uyku_saati_entry = None
         self.eposta_entry_unuttum = None
         self.dogrulama_kodu = None
         self.kullanici_bilgisi = None
@@ -32,12 +32,14 @@ class Uygulama:
         self.not_defteri = ttk.Notebook(self.pencere)
         self.not_defteri.pack(fill=tk.BOTH, expand=True)
 
+        # Initialize kullanici_bilgisi
+        self.kullanici_bilgisi = None
+
         # Giriş ekranını oluştur
         self.giris_ekrani_gorunumu()
 
     def verileri_kaydet(self):
         ad_soyad = self.ad_soyad_entry.get()
-        uyku_saati = self.uyku_saati_entry.get()
 
         veriler = {
             "AdSoyad": ad_soyad,
@@ -67,7 +69,7 @@ class Uygulama:
         tk.Button(giris_tab, text="Kayıt Ol", command=self.kayit_ol_gorunumu).pack(pady=10)
 
         tk.Button(giris_tab, text="Şifremi Unuttum", command=self.sifremi_unuttum_gorunumu).pack(pady=10)
-    
+
     def kayit_ol_gorunumu(self):
         kayit_tab = ttk.Frame(self.not_defteri)
         self.not_defteri.add(kayit_tab, text="Kayıt Ol")
@@ -114,8 +116,7 @@ class Uygulama:
         )
 
         with open("kullanicilar.json", "a") as dosya:
-            json.dump(yeni_kullanici.__dict__, dosya)
-            dosya.write("\n")  # Her kullanıcıyı yeni bir satıra ekleyin
+            dosya.write(json.dumps(yeni_kullanici.__dict__) + "\n")  # Corrected the writing format
 
         messagebox.showinfo("Başarılı", "Kayıt işlemi tamamlandı.")
 
@@ -131,6 +132,7 @@ class Uygulama:
             messagebox.showerror("Hata", "Geçersiz e-posta adresi.")
             return False
         return True
+
     def sifremi_unuttum_gorunumu(self):
         unuttum_tab = ttk.Frame(self.not_defteri)
         self.not_defteri.add(unuttum_tab, text="Şifremi Unuttum")
@@ -222,13 +224,6 @@ class Uygulama:
             pass  # E-posta gönderme işlemi buraya eklenecek
         except Exception as e:
             messagebox.showerror("Hata", f"E-posta gönderme hatası: {str(e)}")
-            
-    def email_dogrula(self, email):
-        pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
-        if not re.match(pattern, email):
-            messagebox.showerror("Hata", "Geçersiz e-posta adresi.")
-            return False
-        return True            
 
     def kullanici_var_mi(self, eposta):
         try:
@@ -248,7 +243,7 @@ class Uygulama:
     def random_string(self, length):
         letters = string.ascii_lowercase
         return ''.join(random.choice(letters) for i in range(length))
-    
+
     def giris_yap(self):
         eposta = self.eposta_entry.get()
         sifre = self.sifre_entry.get()
@@ -266,6 +261,7 @@ class Uygulama:
                 return
 
         messagebox.showerror("Hata", "E-posta veya şifre hatalı.")
+
 if __name__ == "__main__":
     pencere = tk.Tk()
     uygulama = Uygulama(pencere)
