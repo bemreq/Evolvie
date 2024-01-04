@@ -70,6 +70,47 @@ class Uygulama:
 
         tk.Button(giris_tab, text="Şifremi Unuttum", command=self.sifremi_unuttum_gorunumu).pack(pady=10)
 
+    def kullanici_var_mi(self, eposta):
+        try:
+            with open("kullanicilar.json", "r") as dosya:
+                kullanicilar = dosya.readlines()
+
+            for kullanici_str in kullanicilar:
+                kullanici = json.loads(kullanici_str)
+                if kullanici["Eposta"] == eposta:
+                    self.kullanici_bilgisi = Kullanici(
+                        ad_soyad=kullanici.get("AdSoyad", ""),
+                        eposta=kullanici.get("Eposta", ""),
+                        sifre=kullanici.get("Sifre", "")
+                    )
+                    return True
+        except FileNotFoundError:
+            return False
+
+        return False
+
+    def giris_yap(self):
+        eposta = self.eposta_entry.get()
+        sifre = self.sifre_entry.get()
+
+        if not eposta or not sifre:
+            messagebox.showerror("Hata", "E-posta ve şifre alanları boş bırakılamaz.")
+            return
+
+        if not self.kullanici_var_mi(eposta):
+            messagebox.showerror("Hata", "Bu e-posta adresi kayıtlı değil.")
+            return
+
+        # Girilen şifreyi hashleyerek kontrol et
+        girilen_sifre_hash = hashlib.sha256(sifre.encode()).hexdigest()
+        if self.kullanici_bilgisi.Sifre == girilen_sifre_hash:
+            messagebox.showinfo("Başarılı", "Giriş işlemi tamamlandı.")
+
+            # Giriş ekranını kapat
+            self.not_defteri.forget(0)
+        else:
+            messagebox.showerror("Hata", "E-posta veya şifre hatalı.")
+
     def kayit_ol_gorunumu(self):
         kayit_tab = ttk.Frame(self.not_defteri)
         self.not_defteri.add(kayit_tab, text="Kayıt Ol")
@@ -116,7 +157,7 @@ class Uygulama:
         )
 
         with open("kullanicilar.json", "a") as dosya:
-            dosya.write(json.dumps(yeni_kullanici.__dict__) + "\n")  # Corrected the writing format
+            dosya.write(json.dumps(yeni_kullanici.__dict__) + "\n")
 
         messagebox.showinfo("Başarılı", "Kayıt işlemi tamamlandı.")
 
@@ -208,59 +249,41 @@ class Uygulama:
             return
 
         # Kullanıcıya ait şifreyi güncelle
-        # Bu bölümü uygun bir şekilde güncellemeniz gerekiyor.
-        self.kullanici_bilgisi.Sifre = self.hash_sifre(yeni_sifre)
+        if self.kullanici_bilgisi:
+            self.kullanici_bilgisi.Sifre = self.hash_sifre(yeni_sifre)
 
-        messagebox.showinfo("Başarılı", "Şifre başarıyla güncellendi.")
+            messagebox.showinfo("Başarılı", "Şifre başarıyla güncellendi.")
 
-        # Tüm sayfaları kapat ve giriş ekranına yönlendir
-        self.not_defteri.forget(0)
-        self.giris_ekrani_gorunumu()
+            # Tüm sayfaları kapat ve giriş ekranına yönlendir
+            self.not_defteri.forget(0)
+            self.giris_ekrani_gorunumu()
+        else:
+            messagebox.showerror("Hata", "Kullanıcı bilgisi bulunamadı.")
 
     def eposta_gonder(self, eposta, icerik):
-        # E-posta gönderme işlemini gerçekleştir
-        # Bu bölümü uygun bir şekilde güncellemeniz gerekiyor.
         try:
-            pass  # E-posta gönderme işlemi buraya eklenecek
+            # E-posta gönderme işlemini gerçekleştir
+            smtp_server = "smtp.gmail.com"
+            smtp_port = 587
+            smtp_username = "emre.gltkn24@gmail.com"
+            smtp_password = "omjb dgjm fpwm xjra"  # Buraya oluşturduğunuz şifreyi ekleyin
+
+            msg = MIMEText(icerik)
+            msg["Subject"] = "Evolvie Doğrulama Kodu"
+            msg["From"] = smtp_username
+            msg["To"] = eposta
+
+            with smtplib.SMTP(smtp_server, smtp_port) as server:
+                server.starttls()
+                server.login(smtp_username, smtp_password)
+                server.sendmail(smtp_username, eposta, msg.as_string())
+                
         except Exception as e:
             messagebox.showerror("Hata", f"E-posta gönderme hatası: {str(e)}")
-
-    def kullanici_var_mi(self, eposta):
-        try:
-            with open("kullanicilar.json", "r") as dosya:
-                kullanicilar = dosya.readlines()
-
-            for kullanici_str in kullanicilar:
-                kullanici = json.loads(kullanici_str)
-                if kullanici["Eposta"] == eposta:
-                    self.kullanici_bilgisi = Kullanici(**kullanici)
-                    return True
-        except FileNotFoundError:
-            return False
-
-        return False
 
     def random_string(self, length):
         letters = string.ascii_lowercase
         return ''.join(random.choice(letters) for i in range(length))
-
-    def giris_yap(self):
-        eposta = self.eposta_entry.get()
-        sifre = self.sifre_entry.get()
-
-        with open("kullanicilar.json", "r") as dosya:
-            kullanicilar = dosya.readlines()
-
-        for kullanici_str in kullanicilar:
-            kullanici = json.loads(kullanici_str)
-            if kullanici["Eposta"] == eposta and kullanici["Sifre"] == hashlib.sha256(sifre.encode()).hexdigest():
-                messagebox.showinfo("Başarılı", "Giriş işlemi tamamlandı.")
-
-                # Giriş ekranını kapat
-                self.not_defteri.forget(0)
-                return
-
-        messagebox.showerror("Hata", "E-posta veya şifre hatalı.")
 
 if __name__ == "__main__":
     pencere = tk.Tk()
