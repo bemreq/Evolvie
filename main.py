@@ -279,7 +279,7 @@ class Uygulama:
             smtp_server = "smtp.gmail.com"
             smtp_port = 587
             smtp_username = "emre.gltkn24@gmail.com"
-            smtp_password = "omjb dgjm fpwm xjra"  # Buraya oluşturduğunuz şifreyi ekleyin
+            smtp_password = "omjb dgjm fpwm xjra"
 
             msg = MIMEText(icerik)
             msg["Subject"] = "Evolvie Doğrulama Kodu"
@@ -303,3 +303,5 @@ if __name__ == "__main__":
     pencere = tk.Tk()
     uygulama = Uygulama(pencere)
     pencere.mainloop()
+    
+#dogrulama sayfasi, guncellenmis sifreyi hashlama!!
