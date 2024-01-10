@@ -1,0 +1,105 @@
+    def giris_ekrani(self):
+        giris_tab = ttk.Frame(self.not_defteri)
+        self.not_defteri.add(giris_tab, text="Giriş Ekranı")
+
+        tk.Label(giris_tab, text="Hoş Geldiniz!").pack(pady=10)
+
+        tk.Label(giris_tab, text="E-posta Adresi:").pack()
+        self.eposta_entry = tk.Entry(giris_tab)
+        self.eposta_entry.pack()
+
+        tk.Label(giris_tab, text="Şifre:").pack()
+        self.sifre_entry = tk.Entry(giris_tab, show="*")
+        self.sifre_entry.pack()
+
+        tk.Button(giris_tab, text="Giriş Yap",
+                  command=self.giris_yap).pack(pady=10)
+
+        tk.Button(giris_tab, text="Kayıt Ol",
+                  command=self.kayit_ekrani).pack(pady=10)
+
+        tk.Button(giris_tab, text="Şifremi Unuttum",
+                  command=self.sifremi_unuttum_ekrani).pack(pady=10)
+
+
+
+
+
+    def kayit_ekrani(self):
+        kayit_tab = ttk.Frame(self.not_defteri)
+        self.not_defteri.add(kayit_tab, text="Kayıt Ol")
+
+        tk.Label(kayit_tab, text="Ad Soyad:").pack()
+        self.ad_soyad_entry = tk.Entry(kayit_tab)
+        self.ad_soyad_entry.pack()
+
+        tk.Label(kayit_tab, text="E-posta Adresi:").pack()
+        self.eposta_entry_kayit = tk.Entry(kayit_tab)
+        self.eposta_entry_kayit.pack()
+
+        tk.Label(kayit_tab, text="Şifre:").pack()
+        self.sifre_entry_kayit = tk.Entry(kayit_tab, show="*")
+        self.sifre_entry_kayit.pack()
+
+        tk.Button(kayit_tab, text="Kayıt Ol",
+                  command=self.kullanici_kaydet).pack(pady=10)
+        
+        # Kayıt Ol sekmesine geçiş
+        self.not_defteri.select(1)
+
+        # Giriş ekranını gizle
+        self.not_defteri.forget(0)
+
+
+
+
+
+    def sifremi_unuttum_ekrani(self):
+        unuttum_tab = ttk.Frame(self.not_defteri)
+        self.not_defteri.add(unuttum_tab, text="Şifremi Unuttum")
+
+        tk.Label(unuttum_tab, text="E-posta Adresi:").pack()
+        self.eposta_entry_unuttum = tk.Entry(unuttum_tab)
+        self.eposta_entry_unuttum.pack()
+
+        tk.Button(unuttum_tab, text="Doğrulama Kodu Gönder",
+                  command=self.dogrulama_kodu_gonder).pack(pady=10)
+
+        # Şifremi Unuttum Sekmesine Gec
+        self.not_defteri.select(1)
+
+        # Giriş Ekranını Gizle
+        self.not_defteri.forget(0)
+
+
+
+
+    def eposta_dogrulama_ekrani(self):
+        dogrulama_tab = ttk.Frame(self.not_defteri)
+        self.not_defteri.add(dogrulama_tab, text="E-Posta Doğrulama")
+
+        tk.Label(dogrulama_tab, text="Doğrulama Kodu").pack()
+        self.dogrulama_entry = tk.Entry(dogrulama_tab)
+        self.dogrulama_entry.pack()
+
+        tk.Button(dogrulama_tab, text="Doğrula",
+                  command=self.dogrula).pack(pady=10)
+
+
+
+
+    def yeni_sifre_gorunumu(self):
+        yeni_sifre_tab = ttk.Frame(self.not_defteri)
+        self.not_defteri.add(yeni_sifre_tab, text="Yeni Şifre Oluştur")
+
+        tk.Label(yeni_sifre_tab, text="Yeni Şifre:").pack()
+        self.yeni_sifre_entry = tk.Entry(yeni_sifre_tab, show="*")
+        self.yeni_sifre_entry.pack()
+
+        tk.Label(yeni_sifre_tab, text="Yeni Şifre Tekrar:").pack()
+        self.yeni_sifre_tekrar_entry = tk.Entry(
+            yeni_sifre_tab, show="*")
+        self.yeni_sifre_tekrar_entry.pack()
+
+        tk.Button(yeni_sifre_tab, text="Şifreyi Değiştir",
+                  command=self.sifreyi_degistir).pack(pady=10)

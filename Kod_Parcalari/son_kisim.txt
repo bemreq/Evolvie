@@ -1,0 +1,4 @@
+if __name__ == "__main__":
+    pencere = tk.Tk()
+    uygulama = Uygulama(pencere)
+    pencere.mainloop()

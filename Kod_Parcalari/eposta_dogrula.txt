@@ -1,0 +1,36 @@
+    def email_dogrula(self, email):
+        pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        if not re.match(pattern, email):
+            messagebox.showerror("Hata", "Geçersiz e-posta adresi.")
+            return False
+        return True
+
+
+    def dogrulama_kodu_gonder(self):
+        eposta = self.eposta_entry_unuttum.get()
+
+        # Kullanıcının daha önce kayıtlı olup olmadığını kontrol et
+        if not self.kullanici_var_mi(eposta):
+            messagebox.showerror("Hata", "Bu e-posta adresi kayıtlı değil.")
+            return
+
+        # Doğrulama kodu oluştur ve e-posta ile gönder
+        self.dogrulama_kodu = self.random_string(6)
+        self.eposta_gonder(eposta, f"Doğrulama Kodu: {self.dogrulama_kodu}")
+
+        # Şifremi Unuttum sekmesine geçiş
+        self.not_defteri.select(2)
+
+        # Giriş ekranını gizle
+        self.not_defteri.forget(1)
+
+
+    def dogrula(self):
+        girilen_kod = self.dogrulama_entry.get()
+
+        # Doğrulama kodunu kontrol et
+        if girilen_kod == self.dogrulama_kodu:
+            messagebox.showinfo("Başarılı", "Doğrulama işlemi tamamlandı.")
+            self.yeni_sifre_gorunumu()
+        else:
+            messagebox.showerror("Hata", "Geçersiz doğrulama kodu.")

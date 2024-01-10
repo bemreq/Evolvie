@@ -1,0 +1,21 @@
+    def sifreyi_degistir(self):
+        yeni_sifre = self.yeni_sifre_entry.get()
+        yeni_sifre_tekrar = self.yeni_sifre_tekrar_entry.get()
+
+        # Yeni şifreleri kontrol et
+        if yeni_sifre != yeni_sifre_tekrar:
+            messagebox.showerror("Hata", "Şifreler uyuşmuyor.")
+            return
+
+        # Kullanıcıya ait şifreyi güncelle
+        if self.kullanici_bilgisi:
+            self.kullanici_bilgisi.Sifre = self.hash_sifre(yeni_sifre)
+
+            messagebox.showinfo(
+                "Başarılı", "Şifre başarıyla güncellendi.")
+
+            # Tüm sayfaları kapat ve giriş ekranına yönlendir
+            self.not_defteri.forget(0)
+            self.giris_ekrani_gorunumu()
+        else:
+            messagebox.showerror("Hata", "Kullanıcı bilgisi bulunamadı.")

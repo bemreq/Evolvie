@@ -1,0 +1,31 @@
+class Kullanici:
+    def __init__(self, ad_soyad, eposta, sifre):
+        self.AdSoyad = ad_soyad
+        self.Eposta = eposta
+        self.Sifre = self.hash_sifre(sifre)
+
+    def hash_sifre(self, sifre):
+        return hashlib.sha256(sifre.encode()).hexdigest()
+
+
+class Uygulama:
+    def __init__(self, pencere):
+        self.pencere = pencere
+        self.pencere.title("Evolvie")
+        self.pencere.geometry("400x800")
+
+        self.sayfa_degistirici = tk.StringVar(value="Giris Ekrani")
+        self.ad_soyad_entry = None
+        self.eposta_entry = None
+        self.sifre_entry = None
+        self.dogrulama_kodu_entry = None
+        self.kullanici_bilgisi = None
+
+        self.not_defteri = ttk.Notebook(self.pencere)
+        self.not_defteri.pack(fill=tk.BOTH, expand=True)
+
+        # Initialize kullanici_bilgisi
+        self.kullanici_bilgisi = None
+
+        # Giriş ekranını oluştur
+        self.giris_ekrani_gorunumu()

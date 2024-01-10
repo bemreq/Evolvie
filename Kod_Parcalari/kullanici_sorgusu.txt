@@ -1,0 +1,18 @@
+    def kullanici_var_mi(self, eposta):
+        try:
+            with open("kullanicilar.json", "r") as dosya:
+                kullanicilar = dosya.readlines()
+
+            for kullanici_str in kullanicilar:
+                kullanici = json.loads(kullanici_str)
+                if kullanici["Eposta"] == eposta:
+                    self.kullanici_bilgisi = Kullanici(
+                        ad_soyad=kullanici.get("AdSoyad", ""),
+                        eposta=kullanici.get("Eposta", ""),
+                        sifre=kullanici.get("Sifre", "")
+                    )
+                    return True
+        except FileNotFoundError:
+            return False
+
+        return False

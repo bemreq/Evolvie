@@ -1,0 +1,22 @@
+    def giris_yap(self):
+        eposta = self.eposta_entry.get()
+        sifre = self.sifre_entry.get()
+
+        if not eposta or not sifre:
+            messagebox.showerror(
+                "Hata", "E-posta ve şifre alanları boş bırakılamaz.")
+            return
+
+        if not self.kullanici_var_mi(eposta):
+            messagebox.showerror("Hata", "Bu e-posta adresi kayıtlı değil.")
+            return
+
+        # Girilen şifreyi hashleyerek kontrol et
+        girilen_sifre_hash = hashlib.sha256(sifre.encode()).hexdigest()
+        if self.kullanici_bilgisi.Sifre == girilen_sifre_hash:
+            messagebox.showinfo("Başarılı", "Giriş işlemi tamamlandı.")
+
+            # Giriş ekranını kapat
+            self.not_defteri.forget(0)
+        else:
+            messagebox.showerror("Hata", "E-posta veya şifre hatalı.")

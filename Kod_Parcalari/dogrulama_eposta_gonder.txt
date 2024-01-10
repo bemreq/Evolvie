@@ -1,0 +1,21 @@
+    def eposta_gonder(self, eposta, icerik):
+        try:
+            # E-posta gönderme işlemini gerçekleştir
+            smtp_server = "smtp.gmail.com"
+            smtp_port = 587
+            smtp_username = "emre.gltkn24@gmail.com"
+            smtp_password = "omjb dgjm fpwm xjra"
+
+            msg = MIMEText(icerik)
+            msg["Subject"] = "Evolvie Doğrulama Kodu"
+            msg["From"] = smtp_username
+            msg["To"] = eposta
+
+            with smtplib.SMTP(smtp_server, smtp_port) as server:
+                server.starttls()
+                server.login(smtp_username, smtp_password)
+                server.sendmail(smtp_username, eposta, msg.as_string())
+
+        except Exception as e:
+            messagebox.showerror(
+                "Hata", f"E-posta gönderme hatası: {str(e)}")

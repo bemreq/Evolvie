@@ -1,0 +1,15 @@
+    def verileri_kaydet(self):
+        ad_soyad = self.ad_soyad_entry.get()
+        eposta = self.eposta_entry.get()
+        sifre = self.sifre_entry.get()
+        
+        veriler = {
+            "Ad Soyad": ad_soyad,
+            "Eposta": eposta,
+            "Sifre": sifre,
+        }
+
+        with open("kullanici_verileri.json", "w") as dosya:
+            json.dump(veriler, dosya, indent=2)
+
+        messagebox.showinfo("Başarılı", "Veriler başarıyla kaydedildi.")

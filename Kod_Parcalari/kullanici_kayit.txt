@@ -1,0 +1,32 @@
+    def kullanici_kaydet(self):
+        ad_soyad = self.ad_soyad_entry.get()
+
+        # Kullanıcıların daha önce kayıtlı olup olmadığını kontrol et
+        if self.kullanici_var_mi(self.eposta_entry_kayit.get()):
+            messagebox.showerror(
+                "Hata", "Bu e-posta adresi zaten kullanılmaktadır.")
+            return
+
+        if not ad_soyad or not self.eposta_entry_kayit.get() or not self.sifre_entry_kayit.get():
+            messagebox.showerror("Hata", "Lütfen tüm alanları doldurun.")
+            return
+
+        if not self.email_dogrula(self.eposta_entry_kayit.get()):
+            return
+
+        yeni_kullanici = Kullanici(
+            ad_soyad=ad_soyad,
+            eposta=self.eposta_entry_kayit.get(),
+            sifre=self.sifre_entry_kayit.get()
+        )
+
+        with open("kullanicilar.json", "a") as dosya:
+            dosya.write(json.dumps(yeni_kullanici.__dict__) + "\n")
+
+        messagebox.showinfo("Başarılı", "Kayıt işlemi tamamlandı.")
+
+        # Kayıt işlemi tamamlandıktan sonra kayıt sekmesini kapat
+        self.not_defteri.forget(self.not_defteri.select())
+
+        # Giriş ekranını göster
+        self.giris_ekrani_gorunumu()

@@ -1,0 +1,3 @@
+    def random_string(self, length):
+        digits = string.digits
+        return ''.join(random.choice(digits) for i in range(length))
