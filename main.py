@@ -7,6 +7,16 @@ import random
 import smtplib
 import string
 from email.mime.text import MIMEText
+
+#SINIFLAR
+class Kullanici:
+    def __init__(self, ad_soyad, eposta, sifre):
+        self.AdSoyad = ad_soyad
+        self.Eposta = eposta
+        self.Sifre = self.hash_sifre(sifre)
+
+    def hash_sifre(self, sifre):
+        return hashlib.sha256(sifre.encode()).hexdigest()
 class Uygulama:
     def __init__(self, root):
         self.root = root
@@ -27,19 +37,184 @@ class Uygulama:
         self.sayfa_numarasi = 0
         self.sayfayi_goster()
 
+#YARDIMCI FONKSIYONLAR
+
+    def sayfa_goster(self, sayfa_numarasi):
+        self.not_defteri.forget(0)
+        self.not_defteri.pack_forget()
+        self.sayfa_numarasi = sayfa_numarasi
+        self.sayfayi_goster()
+        
+    def sayfa_gecis(self, hedef_sayfa):
+        self.not_defteri.forget(0)
+        self.not_defteri.pack_forget()
+        self.sayfa_numarasi = hedef_sayfa
+        self.sayfayi_goster()
+            
+    def email_dogrula(self, email):
+        pattern = r'^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$'
+        if not re.match(pattern, email):
+            messagebox.showerror("Hata", "Geçersiz e-posta adresi.")
+            return False
+        return True
+    
+    def random_string(self, length):
+        digits = string.digits
+        return ''.join(random.choice(digits) for i in range(length))
+    
+    def eposta_gonder(self, eposta, icerik):
+        try:
+            smtp_server = "smtp.gmail.com"
+            smtp_port = 587
+            smtp_username = "emre.gltkn24@gmail.com"
+            smtp_password = "omjb dgjm fpwm xjra"
+
+            msg = MIMEText(icerik)
+            msg["Subject"] = "Evolvie Doğrulama Kodu"
+            msg["From"] = smtp_username
+            msg["To"] = eposta
+
+            with smtplib.SMTP(smtp_server, smtp_port) as server:
+                server.starttls()
+                server.login(smtp_username, smtp_password)
+                server.sendmail(smtp_username, eposta, msg.as_string())
+            pass
+        except Exception as e:
+            messagebox.showerror(
+                "Hata", f"E-posta gönderme hatası: {str(e)}")
+            
+#KULLANICI ISLEMLERI
+
+    def verileri_kaydet(self):
+        ad_soyad = self.ad_soyad_entry.get()
+        eposta = self.eposta_entry.get()
+        sifre = self.sifre_entry.get()
+        
+        veriler = {
+            "Ad Soyad": ad_soyad,
+            "Eposta": eposta,
+            "Sifre": sifre,
+        }
+
+        with open("kullanici_verileri.json", "w") as dosya:
+            json.dump(veriler, dosya, indent=2)
+
+        messagebox.showinfo("Başarılı", "Veriler başarıyla kaydedildi.")
+        
+    def kullanici_kaydet(self):
+        ad_soyad = self.ad_soyad_entry.get()
+
+        if self.kullanici_var_mi(self.eposta_entry_kayit.get()):
+            messagebox.showerror(
+                "Hata", "Bu e-posta adresi zaten kullanılmaktadır.")
+            return
+
+        if not ad_soyad or not self.eposta_entry_kayit.get() or not self.sifre_entry_kayit.get():
+            messagebox.showerror("Hata", "Lütfen tüm alanları doldurun.")
+            return
+
+        if not self.email_dogrula(self.eposta_entry_kayit.get()):
+            return
+
+        yeni_kullanici = Kullanici(
+            ad_soyad=ad_soyad,
+            eposta=self.eposta_entry_kayit.get(),
+            sifre=self.sifre_entry_kayit.get()
+        )
+
+        with open("kullanicilar.json", "a") as dosya:
+            dosya.write(json.dumps(yeni_kullanici.__dict__) + "\n")
+
+        messagebox.showinfo("Başarılı", "Kayıt işlemi tamamlandı.")
+
+    def kullanici_var_mi(self, eposta):
+        try:
+            with open("kullanicilar.json", "r") as dosya:
+                kullanicilar = dosya.readlines()
+
+            for kullanici_str in kullanicilar:
+                kullanici = json.loads(kullanici_str)
+                if kullanici["Eposta"] == eposta:
+                    self.kullanici_bilgisi = Kullanici(
+                        ad_soyad=kullanici.get("AdSoyad", ""),
+                        eposta=kullanici.get("Eposta", ""),
+                        sifre=kullanici.get("Sifre", "")
+                    )
+                    return True
+        except FileNotFoundError:
+            return False
+
+        return False
+
+    def giris_yap(self):
+        eposta = self.eposta_entry.get()
+        sifre = self.sifre_entry.get()
+
+        if not eposta or not sifre:
+            messagebox.showerror(
+                "Hata", "E-posta ve şifre alanları boş bırakılamaz.")
+            return
+
+        if not self.kullanici_var_mi(eposta):
+            messagebox.showerror("Hata", "Bu e-posta adresi kayıtlı değil.")
+            return
+
+        girilen_sifre_hash = hashlib.sha256(sifre.encode()).hexdigest()
+        if self.kullanici_bilgisi.Sifre == girilen_sifre_hash:
+            messagebox.showinfo("Başarılı", "Giriş işlemi tamamlandı.")
+
+        else:
+            messagebox.showerror("Hata", "E-posta veya şifre hatalı.")
+
+    def sifreyi_degistir(self):
+        yeni_sifre = self.yeni_sifre_entry.get()
+        yeni_sifre_tekrar = self.yeni_sifre_tekrar_entry.get()
+
+        if yeni_sifre != yeni_sifre_tekrar:
+            messagebox.showerror("Hata", "Şifreler uyuşmuyor.")
+            return
+
+        if self.kullanici_bilgisi:
+            self.kullanici_bilgisi.Sifre = self.hash_sifre(yeni_sifre)
+
+            messagebox.showinfo(
+                "Başarılı", "Şifre başarıyla güncellendi.")
+
+            self.not_defteri.forget(0)
+            self.giris_ekrani()
+        else:
+            messagebox.showerror("Hata", "Kullanıcı bilgisi bulunamadı.")
+
+#DOGRULAMA ISLEMLERI
+
+    def dogrulama_kodu_gonder(self):
+        eposta = self.eposta_entry_unuttum.get()
+
+        if not self.kullanici_var_mi(eposta):
+            messagebox.showerror("Hata", "Bu e-posta adresi kayıtlı değil.")
+            return
+
+        self.dogrulama_kodu = self.random_string(6)
+        self.eposta_gonder(eposta, f"Doğrulama Kodu: {self.dogrulama_kodu}")
+
+    def dogrula(self):
+        girilen_kod = self.dogrulama_entry.get()
+
+        if girilen_kod == self.dogrulama_kodu:
+            messagebox.showinfo("Başarılı", "Doğrulama işlemi tamamlandı.")
+            self.yeni_sifre_ekrani()
+        else:
+            messagebox.showerror("Hata", "Geçersiz doğrulama kodu.")
+
+#ARAYUZ EKRANLARI
+
     def sayfayi_goster(self):
         if self.sayfa_numarasi in self.sayfalar:
             self.sayfalar[self.sayfa_numarasi]()
             self.not_defteri.pack(expand=1, fill="both")
         else:
             print("Geçersiz sayfa numarası.")
-
-    def sayfa_gecis(self, hedef_sayfa):
-        self.not_defteri.forget(0)
-        self.not_defteri.pack_forget()
-        self.sayfa_numarasi = hedef_sayfa
-        self.sayfayi_goster()
-
+            
     def anasayfa_ekrani(self):
         anasayfa_tab = ttk.Frame(self.not_defteri)
         self.not_defteri.add(anasayfa_tab, text="Ana Sayfa")
@@ -60,7 +235,7 @@ class Uygulama:
         self.sifre_entry = tk.Entry(giris_tab, show="*")
         self.sifre_entry.pack()
 
-        tk.Button(giris_tab, text="Giris Yap", command=lambda: self.sayfa_gecis(1)).pack(pady=10)
+        tk.Button(giris_tab, text="Giris Yap", command=lambda: [self.giris_yap(), self.sayfa_gecis(1)]).pack(pady=10)
         tk.Button(giris_tab, text="Kayıt Ol", command=lambda: self.sayfa_gecis(2)).pack(pady=10)
         tk.Button(giris_tab, text="Şifremi Unuttum", command=lambda: self.sayfa_gecis(3)).pack(pady=10)
 
@@ -80,6 +255,7 @@ class Uygulama:
         self.sifre_entry_kayit = tk.Entry(kayit_tab, show="*")
         self.sifre_entry_kayit.pack()
 
+        tk.Button(kayit_tab, text="Kayit Ol", command=lambda: [self.kullanici_kaydet(), self.sayfa_gecis(0)]).pack(pady=10)
         tk.Button(kayit_tab, text="Giris Ekranina Don", command=lambda: self.sayfa_gecis(0)).pack(pady=10)
         tk.Button(kayit_tab, text="Şifremi Unuttum", command=lambda: self.sayfa_gecis(3)).pack(pady=10)
 
