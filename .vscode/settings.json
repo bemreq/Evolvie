@@ -35,5 +35,6 @@
         "tamamlandıktan",
         "tkinter",
         "Uygulama"
-    ]
+    ],
+    "python.analysis.typeCheckingMode": "basic"
 }

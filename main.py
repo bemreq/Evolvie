@@ -126,7 +126,8 @@ class Uygulama:
             dosya.write(json.dumps(yeni_kullanici.__dict__) + "\n")
 
         messagebox.showinfo("Başarılı", "Kayıt işlemi tamamlandı.")
-
+        self.sayfa_gecis(0 )
+        
     def kullanici_var_mi(self, eposta):
         try:
             with open("kullanicilar.json", "r") as dosya:
@@ -162,6 +163,7 @@ class Uygulama:
         girilen_sifre_hash = hashlib.sha256(sifre.encode()).hexdigest()
         if self.kullanici_bilgisi.Sifre == girilen_sifre_hash:
             messagebox.showinfo("Başarılı", "Giriş işlemi tamamlandı.")
+            self.sayfa_gecis(1)
 
         else:
             messagebox.showerror("Hata", "E-posta veya şifre hatalı.")
@@ -235,7 +237,7 @@ class Uygulama:
         self.sifre_entry = tk.Entry(giris_tab, show="*")
         self.sifre_entry.pack()
 
-        tk.Button(giris_tab, text="Giris Yap", command=lambda: [self.giris_yap(), self.sayfa_gecis(1)]).pack(pady=10)
+        tk.Button(giris_tab, text="Giris Yap", command=self.giris_yap).pack(pady=10)
         tk.Button(giris_tab, text="Kayıt Ol", command=lambda: self.sayfa_gecis(2)).pack(pady=10)
         tk.Button(giris_tab, text="Şifremi Unuttum", command=lambda: self.sayfa_gecis(3)).pack(pady=10)
 
@@ -255,7 +257,7 @@ class Uygulama:
         self.sifre_entry_kayit = tk.Entry(kayit_tab, show="*")
         self.sifre_entry_kayit.pack()
 
-        tk.Button(kayit_tab, text="Kayit Ol", command=lambda: [self.kullanici_kaydet(), self.sayfa_gecis(0)]).pack(pady=10)
+        tk.Button(kayit_tab, text="Kayit Ol", command=self.kullanici_kaydet).pack(pady=10)
         tk.Button(kayit_tab, text="Giris Ekranina Don", command=lambda: self.sayfa_gecis(0)).pack(pady=10)
         tk.Button(kayit_tab, text="Şifremi Unuttum", command=lambda: self.sayfa_gecis(3)).pack(pady=10)
 
