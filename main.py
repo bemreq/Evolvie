@@ -312,3 +312,6 @@ if __name__ == "__main__":
     root = tk.Tk()
     uygulama = Uygulama(root)
     root.mainloop()
+
+
+#Anasayfa Duzenle!
