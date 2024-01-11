@@ -2,7 +2,6 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 import json
 import re
-import hashlib
 import random
 import smtplib
 import string
@@ -13,10 +12,8 @@ class Kullanici:
     def __init__(self, ad_soyad, eposta, sifre):
         self.AdSoyad = ad_soyad
         self.Eposta = eposta
-        self.Sifre = self.hash_sifre(sifre)
+        self.Sifre = sifre
 
-    def hash_sifre(self, sifre):
-        return hashlib.sha256(sifre.encode()).hexdigest()
 class Uygulama:
     def __init__(self, root):
         self.root = root
@@ -152,21 +149,19 @@ class Uygulama:
         sifre = self.sifre_entry.get()
 
         if not eposta or not sifre:
-            messagebox.showerror(
-                "Hata", "E-posta ve şifre alanları boş bırakılamaz.")
+            messagebox.showerror("Hata", "E-posta ve şifre alanları boş bırakılamaz.")
             return
 
         if not self.kullanici_var_mi(eposta):
             messagebox.showerror("Hata", "Bu e-posta adresi kayıtlı değil.")
             return
 
-        girilen_sifre_hash = hashlib.sha256(sifre.encode()).hexdigest()
-        if self.kullanici_bilgisi.Sifre == girilen_sifre_hash:
+        if self.kullanici_bilgisi.Sifre == sifre and self.kullanici_bilgisi.Eposta == eposta:
             messagebox.showinfo("Başarılı", "Giriş işlemi tamamlandı.")
-            self.sayfa_gecis(1)
-
+            self.sayfa_gecis(1)   
         else:
-            messagebox.showerror("Hata", "E-posta veya şifre hatalı.")
+            messagebox.showerror("Hata", "E-posta veya sifre hatalı.")
+
 
     def sifreyi_degistir(self):
         yeni_sifre = self.yeni_sifre_entry.get()
@@ -177,13 +172,14 @@ class Uygulama:
             return
 
         if self.kullanici_bilgisi:
-            self.kullanici_bilgisi.Sifre = self.hash_sifre(yeni_sifre)
+            self.kullanici_bilgisi.Sifre = self.sifre_entry(yeni_sifre)
 
             messagebox.showinfo(
                 "Başarılı", "Şifre başarıyla güncellendi.")
 
             self.not_defteri.forget(0)
             self.giris_ekrani()
+            
         else:
             messagebox.showerror("Hata", "Kullanıcı bilgisi bulunamadı.")
 
@@ -238,8 +234,9 @@ class Uygulama:
         self.sifre_entry.pack()
 
         tk.Button(giris_tab, text="Giris Yap", command=self.giris_yap).pack(pady=10)
+        tk.Button(giris_tab, text="Şifreni Mi Unuttun ?", command=lambda: self.sayfa_gecis(3)).pack(pady=10)
+        tk.Label(giris_tab, text="Hesabin Yok Mu ?").pack(pady=10)
         tk.Button(giris_tab, text="Kayıt Ol", command=lambda: self.sayfa_gecis(2)).pack(pady=10)
-        tk.Button(giris_tab, text="Şifremi Unuttum", command=lambda: self.sayfa_gecis(3)).pack(pady=10)
 
     def kayit_ekrani(self):
         kayit_tab = ttk.Frame(self.not_defteri)
@@ -258,13 +255,18 @@ class Uygulama:
         self.sifre_entry_kayit.pack()
 
         tk.Button(kayit_tab, text="Kayit Ol", command=self.kullanici_kaydet).pack(pady=10)
-        tk.Button(kayit_tab, text="Giris Ekranina Don", command=lambda: self.sayfa_gecis(0)).pack(pady=10)
-        tk.Button(kayit_tab, text="Şifremi Unuttum", command=lambda: self.sayfa_gecis(3)).pack(pady=10)
+        tk.Label(kayit_tab, text="Hesabin Var Mi?").pack(pady=10)
+        tk.Button(kayit_tab, text="Giris Yap", command=lambda: self.sayfa_gecis(0)).pack(pady=10)
 
     def sifremi_unuttum_ekrani(self):
         unuttum_tab = ttk.Frame(self.not_defteri)
         self.not_defteri.add(unuttum_tab, text="Şifremi Unuttum")
 
+        tk.Label(unuttum_tab, text="Giriş Yaparken Sorun mu Yaşıyorsun?").pack(pady=10) 
+        tk.Label(unuttum_tab, text="E-posta adresini, telefon numaranı veya").pack(pady=10)
+        tk.Label(unuttum_tab, text="kullanıcı adını gir ve hesabına yeniden").pack(pady=10)
+        tk.Label(unuttum_tab, text="girebilmen için sana bir bağlantı gönderelim.").pack(pady=10)
+        
         tk.Label(unuttum_tab, text="Ad Soyad:").pack()
         self.ad_soyad_entry_unuttum = tk.Entry(unuttum_tab)
         self.ad_soyad_entry_unuttum.pack()
@@ -272,10 +274,11 @@ class Uygulama:
         tk.Label(unuttum_tab, text="E-posta Adresi:").pack()
         self.eposta_entry_unuttum = tk.Entry(unuttum_tab)
         self.eposta_entry_unuttum.pack()
-        
-        tk.Button(unuttum_tab, text="Önceki Sayfa", command=lambda: self.sayfa_gecis(2)).pack(pady=10)
-        tk.Button(unuttum_tab, text="Giris Ekranina Don", command=lambda: self.sayfa_gecis(0)).pack(pady=10)
+
         tk.Button(unuttum_tab, text="Doğrulama Kodu Gönder", command=lambda: self.sayfa_gecis(4)).pack(pady=10)
+        tk.Label(unuttum_tab, text="Veya").pack(pady=10)   
+        tk.Button(unuttum_tab, text="Yeni Hesap Olustur", command=lambda: self.sayfa_gecis(2)).pack(pady=10)  
+        tk.Button(unuttum_tab, text="Giris Ekranina Don", command=lambda: self.sayfa_gecis(0)).pack(pady=10)
 
     def eposta_dogrulama_ekrani(self):
         dogrulama_tab = ttk.Frame(self.not_defteri)
